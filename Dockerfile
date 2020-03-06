@@ -45,6 +45,9 @@ RUN cd ${LARAVEL_PATH} \
       && mkdir -p storage/logs \
       && chmod -R 777 storage
 
-CMD ["php-fpm"]
+FROM nginx:alpine as nginx
 
-EXPOSE 9000
+ARG LARAVEL_PATH=/app/laravel
+
+COPY devops/nginx/laravel.conf /etc/nginx/conf.d/
+COPY --from=laravel ${LARAVEL_PATH}/public ${LARAVEL_PATH}/public
