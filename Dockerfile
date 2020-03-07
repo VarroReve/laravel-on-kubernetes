@@ -3,7 +3,8 @@ FROM node:alpine as frontend
 COPY package.json /app/
 
 RUN cd /app \
-      && npm install --registry=https://registry.npm.taobao.org
+      && npm install
+#      && npm install --registry=https://registry.npm.taobao.org
 
 COPY webpack.mix.js /app/
 COPY resources/ /app/resources/
@@ -17,7 +18,7 @@ COPY database/ /app/database/
 COPY composer.json /app/
 
 RUN cd /app \
-      && composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/ \
+#      && composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/ \
       && composer install \
            --ignore-platform-reqs \
            --no-interaction \
