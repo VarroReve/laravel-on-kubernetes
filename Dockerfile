@@ -15,10 +15,11 @@ RUN cd /app \
 FROM composer as composer
 
 COPY database/ /app/database/
-COPY composer.json /app/
+COPY composer.json composer.lock /app/
 
 RUN cd /app \
 #      && composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/ \
+      && composer global require hirak/prestissimo \
       && composer install \
            --ignore-platform-reqs \
            --no-interaction \
