@@ -25,7 +25,7 @@ RUN cd /app \
            --no-scripts \
            --prefer-dist
 
-FROM php:7.2-fpm-alpine as laravel
+FROM php:7.2-fpm-alpine as php-fpm
 
 ARG LARAVEL_PATH=/app/laravel
 
@@ -50,4 +50,4 @@ FROM nginx:alpine as nginx
 ARG LARAVEL_PATH=/app/laravel
 
 COPY devops/nginx/laravel.conf /etc/nginx/conf.d/
-COPY --from=laravel ${LARAVEL_PATH}/public ${LARAVEL_PATH}/public
+COPY --from=php-fpm ${LARAVEL_PATH}/public ${LARAVEL_PATH}/public

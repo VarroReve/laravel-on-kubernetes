@@ -1,0 +1,102 @@
+kind: pipeline
+type: kubernetes
+name: production
+
+steps:
+  - name: build_prod
+    image: plugins/docker
+    settings:
+      use_cache: true
+      username:
+        from_secret: dockerhub_username
+      password:
+        from_secret: dockerhub_password
+      repo: sakyavarro/laravel
+      tags: ${DRONE_TAG=prod-latest}
+
+  - name: deploy_prod
+    image: pelotech/drone-helm3
+    settings:
+      mode: upgrade
+      namespace: production
+      chart: ./helm
+      release: web-blog
+      wait_for_upgrade: true
+      force_upgrade: true
+      skip_tls_verify: true
+      debug: true
+      values_files: ["./helm/values.prod.yaml"]
+      kube_api_server:
+        from_secret: kube_api_server
+      kube_token:
+        from_secret: kube_token
+
+
+#  - name: notify-dingtalk1
+#    image: lddsb/drone-dingtalk-message
+#    settings:
+#      token:
+#        from_secret: dingtalk_token_insta_bot_drone_1
+#      type: markdown
+#
+#  - name: notify-dingtalk2
+#    image: lddsb/drone-dingtalk-message
+#    settings:
+#      token: 61475d3297ab163609b0154957d706de5d3de658e66226d1bd1bac4e5da86b00
+#      type: markdown
+
+#  - name: notify-wechat
+#    image: yakumioto/serverchan
+#    settings:
+#      key: SCU77779T5aac72e0b07a1a8520e848c48fa1f45b5e1fb859aec0c
+#      text: Your build is complete
+#      desp: Send by ServerChan
+
+trigger:
+  branch:
+    - master
+
+---
+kind: pipeline
+type: kubernetes
+name: staging
+
+steps:
+  - name: build_staging
+    image: plugins/docker
+    settings:
+      use_cache: true
+      username:
+        from_secret: dockerhub_username
+      password:
+        from_secret: dockerhub_password
+      repo: sakyavarro/laravel
+      tags: ${DRONE_TAG=staging-latest}
+      target: php-fpm
+
+  - name: deploy_staging
+    image: pelotech/drone-helm3
+    settings:
+      mode: upgrade
+      namespace: staging
+      chart: ./helm
+      release: svc-laravel
+      wait_for_upgrade: true
+      force_upgrade: true
+      skip_tls_verify: true
+      debug: true
+      values_files: ["./helm/values.staging.yaml"]
+      kube_api_server:
+        from_secret: kube_api_server
+      kube_token:
+        from_secret: kube_token
+
+  - name: notify-dingtalk2
+    image: lddsb/drone-dingtalk-message
+    settings:
+      token: 61475d3297ab163609b0154957d706de5d3de658e66226d1bd1bac4e5da86b00
+      type: markdown
+
+trigger:
+  branch:
+    - staging
