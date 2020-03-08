@@ -229,5 +229,5 @@ return [
 
     ],
 
-    'host_name' => env('HOSTNAME')
+    'host_name' => env('HOSTNAME'),
 ];
