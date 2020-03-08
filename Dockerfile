@@ -81,7 +81,7 @@ RUN cd ${LARAVEL_PATH} \
       && mkdir -p storage/framework/testing \
       && mkdir -p storage/framework/views \
       && mkdir -p storage/logs \
-      && chmod -R 777 storage
+      && chmod -R 777 storage \
       && php artisan config:cache \
       && php artisan route:cache
 
