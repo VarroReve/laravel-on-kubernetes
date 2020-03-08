@@ -19,6 +19,6 @@ class IndexController extends Controller
 
     public function test()
     {
-        return config('app.host_name');
+        return env('HOSTNAME');
     }
 }
