@@ -14,5 +14,5 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', 'IndexController@index');
-
+Route::get('/cache', 'UsersController@cache');
 Route::resource('users', 'UsersController');
