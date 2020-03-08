@@ -27,18 +27,53 @@ RUN cd /app \
            --no-scripts \
            --prefer-dist
 
-FROM php:7.2-fpm-alpine as php-fpm
+FROM laradock/php-fpm:latest-7.3 as php-fpm
 
 ARG LARAVEL_PATH=/app/laravel
 
+USER root
+
+RUN set -xe; \
+    apt-get update -yqq && \
+    pecl channel-update pecl.php.net && \
+    pecl install -o -f redis &&\
+    apt-get install -yqq apt-utils libzip-dev zip unzip && \
+    apt-get -y install inetutils-ping && \
+    apt-get install -y zlib1g-dev libicu-dev g++ && \
+    docker-php-ext-configure zip --with-libzip && \
+    docker-php-ext-install zip && \
+    docker-php-ext-install bcmath && \
+    docker-php-ext-install opcache && \
+    docker-php-ext-configure intl && \
+    docker-php-ext-install intl && \
+    docker-php-ext-enable redis &&\
+    rm -rf /tmp/pear
+
+ARG PUID=1000
+ENV PUID ${PUID}
+ARG PGID=1000
+ENV PGID ${PGID}
+
+RUN groupmod -o -g ${PGID} www-data && \
+    usermod -o -u ${PUID} -g www-data www-data
+
+COPY devops/php-fpm/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+COPY devops/php-fpm/laravel.ini /usr/local/etc/php/conf.d
+COPY devops/php-fpm/xlaravel.pool.conf /usr/local/etc/php-fpm.d/
+
 COPY . ${LARAVEL_PATH}
-COPY .env.example .env
 COPY --from=composer /app/vendor/ ${LARAVEL_PATH}/vendor/
 COPY --from=frontend /app/public/js/ ${LARAVEL_PATH}/public/js/
 COPY --from=frontend /app/public/css/ ${LARAVEL_PATH}/public/css/
 COPY --from=frontend /app/mix-manifest.json ${LARAVEL_PATH}/mix-manifest.json
 
+# Clean up
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    rm /var/log/lastlog /var/log/faillog
+
 RUN cd ${LARAVEL_PATH} \
+      && copy .env.example .env
       && php artisan package:discover \
       && mkdir -p storage \
       && mkdir -p storage/framework/cache \
@@ -47,6 +82,10 @@ RUN cd ${LARAVEL_PATH} \
       && mkdir -p storage/framework/views \
       && mkdir -p storage/logs \
       && chmod -R 777 storage
+      && php artisan config:cache \
+      && php artisan route:cache \
+
+WORKDIR ${LARAVEL_PATH}
 
 FROM nginx:alpine as nginx
 
