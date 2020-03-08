@@ -229,4 +229,5 @@ return [
 
     ],
 
+    'host_name' => env('HOSTNAME')
 ];

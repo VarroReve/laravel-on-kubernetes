@@ -16,4 +16,9 @@ class IndexController extends Controller
     {
         return view('welcome');
     }
+
+    public function test()
+    {
+        return config('app.host_name');
+    }
 }
