@@ -31,8 +31,9 @@ FROM php:7.2-fpm-alpine as php-fpm
 
 ARG LARAVEL_PATH=/app/laravel
 
-COPY --from=composer /app/vendor/ ${LARAVEL_PATH}/vendor/
 COPY . ${LARAVEL_PATH}
+COPY .env.example .env
+COPY --from=composer /app/vendor/ ${LARAVEL_PATH}/vendor/
 COPY --from=frontend /app/public/js/ ${LARAVEL_PATH}/public/js/
 COPY --from=frontend /app/public/css/ ${LARAVEL_PATH}/public/css/
 COPY --from=frontend /app/mix-manifest.json ${LARAVEL_PATH}/mix-manifest.json
