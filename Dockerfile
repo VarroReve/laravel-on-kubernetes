@@ -73,7 +73,7 @@ RUN apt-get clean && \
     rm /var/log/lastlog /var/log/faillog
 
 RUN cd ${LARAVEL_PATH} \
-      && copy .env.example .env
+      && copy .env.example .env \
       && php artisan package:discover \
       && mkdir -p storage \
       && mkdir -p storage/framework/cache \
@@ -83,7 +83,7 @@ RUN cd ${LARAVEL_PATH} \
       && mkdir -p storage/logs \
       && chmod -R 777 storage
       && php artisan config:cache \
-      && php artisan route:cache \
+      && php artisan route:cache
 
 WORKDIR ${LARAVEL_PATH}
 
